@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="./vendor/autoload.php"
+         colors="true">
+    <php>
+        <!-- Specify your instagram client credentials -->
+        <server name="CLIENT_ID" value="" />
+        <server name="CLIENT_SECRET" value="" />
+        <server name="REDIRECT_URI" value="" />
+        <server name="WEBSITE_URL" value="" />
+        <server name="USERNAME" value="" />
+        <server name="PASSWORD" value="" />
+    </php>
+    <testsuites>
+        <testsuite>
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist>
+            <directory suffix=".php">src</directory>
+        </whitelist>
+    </filter>
+</phpunit>
