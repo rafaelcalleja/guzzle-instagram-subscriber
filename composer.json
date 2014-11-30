@@ -1,5 +1,5 @@
 {
-    "name": "guzzlehttp/oauth-subscriber",
+    "name": "guzzlehttp/guzzle-instagram-subscriber",
     "description": "Guzzle Instagram subscriber",
     "homepage": "https://github.com/rafaelcalleja/guzzle-instagram-subscriber",
     "keywords": ["instagram", "access_token", "subscriber", "plugin", "login", "guzzle"],
