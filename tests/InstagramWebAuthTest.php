@@ -138,6 +138,7 @@ class InstagramWebAuthTest extends \PHPUnit_Framework_TestCase
 
         $client = new Client();
         $client->getEmitter()->attach(new InstagramWebAuth([]));
+
         $client->getEmitter()->attach(new Mock([
             new Response(200, [
                 'Set-Cookie' => 'csrftoken=3d24ddab3a6797fe4fffaf45148532e3; expires=Sun, 22-Nov-2015 13:52:10 GMT; Max-Age=31449600; Path=/, mid=VHHmigAEAAEEAttmLKB26UD9lO7T; expires=Sat, 18-Nov-2034 13:52:10 GMT; Max-Age=630720000; Path=/, ccode=ES; Path=/'
