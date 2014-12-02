@@ -16,13 +16,8 @@ use GuzzleHttp\Subscriber\Mock,
     GuzzleHttp\Client;
 use GuzzleHttp\Transaction;
 
-//curl 'https://instagram.com/oauth/authorize/?client_id=033680f54de44a32af2b1a3a9dedf2bf&redirect_uri=http://beldevere.dev/app_dev.php/callback&response_type=token' -H 'Cookie: mid=U0kcHAAEAAHTBof2yHx3BvoWB5jv; ccode=ES; __utmt=1; __utma=1.1488299320.1397300255.1416753672.1416873547.8; __utmb=1.1.10.1416873547; __utmc=1; __utmz=1.1416751157.6.4.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); sessionid=IGSCa281790f1f74ac0fd05aa8d2c2a28763cf397b7420ef90021ca22f0c5a8b9aff%3AwkxVS2rfF3dNEhbzG2gOJdXtb32L37rt%3A%7B%22_auth_user_id%22%3A204386590%2C%22_token%22%3A%22204386590%3A7CgwcUL8ytQuRxh1TayZSea1tFnDUeMt%3A877e07ad075f4616295ba45dd70a189bc855cd2c746b4fed0a1ea27ea16a6954%22%2C%22_auth_user_backend%22%3A%22accounts.backends.CaseInsensitiveModelBackend%22%2C%22last_refreshed%22%3A1416873551.697227%2C%22_tl%22%3A1%2C%22_platform%22%3A4%7D; csrftoken=292a27298a19b84453479d0fa3759a1e; ds_user_id=204386590; __utma=227057989.1732510392.1415731924.1416751163.1416872590.6; __utmb=227057989.5.10.1416872590; __utmc=227057989; __utmz=227057989.1416872590.6.3.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided)' -H 'Origin: https://instagram.com' -H 'Accept-Encoding: gzip,deflate' -H 'Accept-Language: en-US,en;q=0.8,es;q=0.6' -H 'User-Agent: Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36' -H 'Content-Type: application/x-www-form-urlencoded' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' -H 'Cache-Control: max-age=0' -H 'Referer: https://instagram.com/oauth/authorize/?client_id=033680f54de44a32af2b1a3a9dedf2bf&redirect_uri=http://beldevere.dev/app_dev.php/callback&response_type=token' -H 'Connection: keep-alive' --data 'csrfmiddlewaretoken=292a27298a19b84453479d0fa3759a1e&allow=Authorize' --compressed
-
 /**
  * @covers GuzzleHttp\Subscriber\Instagram\ImplicitAuth
- *
- * CURL
- *
  */
 class ImplicitAuthTest extends \PHPUnit_Framework_TestCase
 {
