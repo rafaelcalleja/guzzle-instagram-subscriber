@@ -1,8 +1,16 @@
 <?php
 
+/*
+ * This file is part of the guzzle-instagram-subscriber package.
+ *
+ * (c) Rafael Calleja <rafaelcalleja@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GuzzleHttp\Subscriber\Instagram;
 
-use GuzzleHttp\Client;
 use GuzzleHttp\Collection;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\SetCookie;
@@ -14,44 +22,45 @@ use GuzzleHttp\Message\RequestInterface;
 use GuzzleHttp\Message\ResponseInterface;
 use GuzzleHttp\Subscriber\Cookie;
 
-
-class ImplicitAuth implements SubscriberInterface {
-
+class ImplicitAuth implements SubscriberInterface
+{
     private $config;
 
     /** @var InstagramWebAuth */
     protected $webauth;
 
-    public function __construct($config, InstagramWebAuth $webauth = null){
+    public function __construct($config, InstagramWebAuth $webauth = null)
+    {
         $this->config = Collection::fromConfig(
             $config,
-            [
+            array(
                 'response_type' => 'token',
-                'scope' => 'likes+comments',
+                'scope'         => 'likes+comments',
                 'authorize_url' => 'https://www.instagram.com/oauth/authorize',
-                'origin' => 'https://www.instagram.com',
-                'access_token' => false,
-            ],
-            ['username', 'password', 'client_id', 'redirect_uri' ]
+                'origin'        => 'https://www.instagram.com',
+                'access_token'  => false,
+            ),
+            array('username', 'password', 'client_id', 'redirect_uri')
         );
 
-        $this->webauth = $webauth ?: new InstagramWebAuth([]);
-
+        $this->webauth = $webauth ?: new InstagramWebAuth(array());
     }
 
-
-    public function getAccessToken(){
+    public function getAccessToken()
+    {
         return $this->config['access_token'];
     }
 
-    public function setAccessToken($access_token){
+    public function setAccessToken($access_token)
+    {
         $this->config['access_token'] = $access_token;
     }
 
     /**
-     * Called when a request receives a redirect response
+     * Called when a request receives a redirect response.
      *
      * @param CompleteEvent $event Event emitted
+     *
      * @throws TooManyRedirectsException
      */
     public function onComplete(CompleteEvent $event)
@@ -65,12 +74,10 @@ class ImplicitAuth implements SubscriberInterface {
 
         $hash = parse_url($response->getHeader('Location'), PHP_URL_FRAGMENT);
 
-        if( strpos($hash, 'access_token') === 0 ){
+        if (strpos($hash, 'access_token') === 0) {
             $this->setAccessToken(substr(strstr($hash, '='), 1));
             $response->removeHeader('Location');
         }
-
-
     }
 
     /**
@@ -94,38 +101,32 @@ class ImplicitAuth implements SubscriberInterface {
      */
     public function getEvents()
     {
-        return [
-            'before'   => ['onBefore'],
-            'complete' => ['onComplete', RequestEvents::REDIRECT_RESPONSE]
-        ];
+        return array(
+            'before'   => array('onBefore'),
+            'complete' => array('onComplete', RequestEvents::REDIRECT_RESPONSE),
+        );
     }
-
 
     public function onBefore(BeforeEvent $event)
     {
-
         $client = $event->getClient();
         $request = $event->getRequest();
 
-        if(! $this->hasInstagramWebAuthSubscriber($request)){
+        if (!$this->hasInstagramWebAuthSubscriber($request)) {
             $request->getEmitter()->attach($this->webauth);
             $client->getEmitter()->attach($this->webauth);
         }
 
-        if(! preg_match('/(?:http[s]*\:\/\/)*(.*?)\.(?=[^\/]*\..{2,5})/i', $request->getUrl(), $match) ) {
+        if (!preg_match('/(?:http[s]*\:\/\/)*(.*?)\.(?=[^\/]*\..{2,5})/i', $request->getUrl(), $match)) {
             $request->setUrl(preg_replace('/^(http[s]?)(\:\/\/)/', '$1://www.', $request->getUrl()));
         }
 
-
-        if( $request->getMethod() == 'POST' && $request->getUrl() == $this->config['authorize_url']) {
-
-
-            $response = $client->post('https://www.instagram.com/accounts/login/ajax/', ['body' => [ 'username' => $this->config['username'], 'password' => $this->config['password']]]);
+        if ($request->getMethod() == 'POST' && $request->getUrl() == $this->config['authorize_url']) {
+            $response = $client->post('https://www.instagram.com/accounts/login/ajax/', array('body' => array('username' => $this->config['username'], 'password' => $this->config['password'])));
 
             $cookies = $this->extractCookies($response);
 
-            if( $this->isValidCookies($cookies) ){
-
+            if ($this->isValidCookies($cookies)) {
                 $this->addCookiesHeaderFromArray($request, $cookies);
 
                 $request->getQuery()->set('response_type', $this->config['response_type']);
@@ -133,44 +134,33 @@ class ImplicitAuth implements SubscriberInterface {
                 $request->getQuery()->set('redirect_uri', $this->config['redirect_uri']);
 
                 $postBody = $request->getBody();
-                $postBody->setField('csrfmiddlewaretoken', $cookies['csrftoken']->getValue() );
+                $postBody->setField('csrfmiddlewaretoken', $cookies['csrftoken']->getValue());
                 $postBody->setField('allow', 'Authorize');
 
                 $request->setBody($postBody);
 
-                $request->addHeaders([
-                    'Origin' => $this->config['origin'],
+                $request->addHeaders(array(
+                    'Origin'  => $this->config['origin'],
                     'Referer' => $this->config['origin'],
-                ]);
-
+                ));
             }
-
-
-
-
-
-
         }
-
-
-
     }
 
-    protected function addCookiesHeaderFromArray(RequestInterface $request, array $cookies  = array() ){
-
+    protected function addCookiesHeaderFromArray(RequestInterface $request, array $cookies  = array())
+    {
         $request->setHeader('Cookie', implode('; ',
                 array_map(
-                    function($cookie){
-                        return $cookie->getName() . '=' . CookieJar::getCookieValue($cookie->getValue());
-                    }, $cookies )
+                    function ($cookie) {
+                        return $cookie->getName().'='.CookieJar::getCookieValue($cookie->getValue());
+                    }, $cookies)
             )
         );
-
     }
 
-    protected function extractCookies(ResponseInterface $response){
-
-        return array_reduce( $response->getHeaderAsArray('Set-Cookie'), function ($result, $cookie) {
+    protected function extractCookies(ResponseInterface $response)
+    {
+        return array_reduce($response->getHeaderAsArray('Set-Cookie'), function ($result, $cookie) {
 
             $cookie = SetCookie::fromString($cookie);
 
@@ -178,25 +168,25 @@ class ImplicitAuth implements SubscriberInterface {
 
             return $result;
 
-        }, []);
-
+        }, array());
     }
 
-    protected function isValidCookies($cookies){
+    protected function isValidCookies($cookies)
+    {
         return count(
-            array_intersect( ['csrftoken', 'sessionid', 'ds_user_id'] , array_keys($cookies) )
-        ) === 3 ;
+            array_intersect(array('csrftoken', 'sessionid', 'ds_user_id'), array_keys($cookies))
+        ) === 3;
     }
 
-    protected function hasInstagramWebAuthSubscriber($request){
-
-        foreach( $request->getEmitter()->listeners('before') as $plugin ) {
-            if($plugin[0] instanceof InstagramWebAuth )
+    protected function hasInstagramWebAuthSubscriber($request)
+    {
+        foreach ($request->getEmitter()->listeners('before') as $plugin) {
+            if ($plugin[0] instanceof InstagramWebAuth) {
                 return true;
+            }
         }
 
         return false;
-
     }
 
     /**
@@ -206,7 +196,4 @@ class ImplicitAuth implements SubscriberInterface {
     {
         return $this->webauth;
     }
-
-
-
 }

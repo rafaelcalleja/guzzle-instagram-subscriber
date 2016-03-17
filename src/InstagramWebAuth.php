@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the guzzle-instagram-subscriber package.
+ *
+ * (c) Rafael Calleja <rafaelcalleja@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GuzzleHttp\Subscriber\Instagram;
 
 use GuzzleHttp\Client;
@@ -9,22 +18,22 @@ use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Event\SubscriberInterface;
 use GuzzleHttp\Subscriber\Cookie;
 
-
-class InstagramWebAuth implements SubscriberInterface {
-
+class InstagramWebAuth implements SubscriberInterface
+{
     private $config;
 
-    public function __construct($config){
+    public function __construct($config)
+    {
         $this->config = Collection::fromConfig(
             $config,
-            [
-                'login_ajax' => 'https://www.instagram.com/accounts/login/ajax/',
-                'login_url' => 'https://www.instagram.com/ajax/bz',
-                'origin' => 'https://www.instagram.com',
-                'referer' => 'https://www.instagram.com',
+            array(
+                'login_ajax'    => 'https://www.instagram.com/accounts/login/ajax/',
+                'login_url'     => 'https://www.instagram.com/ajax/bz',
+                'origin'        => 'https://www.instagram.com',
+                'referer'       => 'https://www.instagram.com',
                 'enable_cookie' => true,
-            ],
-            []
+            ),
+            array()
         );
     }
     /**
@@ -48,83 +57,75 @@ class InstagramWebAuth implements SubscriberInterface {
      */
     public function getEvents()
     {
-        return [
-            'before'   => ['onBefore']
-        ];
+        return array(
+            'before'   => array('onBefore'),
+        );
     }
 
     public function onBefore(BeforeEvent $event)
     {
-
         $client = $event->getClient();
         $request = $event->getRequest();
         $config = $request->getConfig();
 
-        if(!$this->hasCookiesSubscriber($request)){
-            if( $this->config['enable_cookie'] ) {
+        if (!$this->hasCookiesSubscriber($request)) {
+            if ($this->config['enable_cookie']) {
                 $cookie = new Cookie();
                 $request->getEmitter()->attach($cookie);
                 $client->getEmitter()->attach($cookie);
+            } else {
+                throw new \RuntimeException('Client cookies are disabled');
             }
-            else throw new \RuntimeException('Client cookies are disabled');
         }
 
-
-        if( $request->getMethod() == 'POST' && $this->config['login_ajax'] == $request->getUrl() ){
-
-            if(empty($request->getBody()->getFields()['username']) || empty($request->getBody()->getFields()['password']))
+        if ($request->getMethod() == 'POST' && $this->config['login_ajax'] == $request->getUrl()) {
+            if (empty($request->getBody()->getFields()['username']) || empty($request->getBody()->getFields()['password'])) {
                 throw new \RuntimeException('Username and password are required');
+            }
 
             $payload = sprintf('{"q":[{"page_id":"","posts":[["slipstream:pageview",{"description":"loginPage","event_name":"pageview","platform":"web","extra":"{\"gk\":{\"rhp\":true}}","hostname":"www.instagram.com","path":"/accounts/login/","referer":"","url":"https://www.instagram.com/accounts/login/"},%s,0],["slipstream:action",{"description":"fbLoginFallback","event_name":"action","extra":"{\"gk\":{\"rhp\":true},\"type\":\"login\"}","hostname":"www.instagram.com","path":"/accounts/login/","referer":"","url":"https://www.instagram.com/accounts/login/"},%s,0]],"trigger":"slipstream:pageview"},{"page_id":"p8ysg7","posts":[["slipstream:action",{"description":"fbLoginFallback","event_name":"action","extra":"{\"gk\":{\"rhp\":true},\"type\":\"login\"}","hostname":"www.instagram.com","path":"/accounts/login/","referer":"","url":"https://www.instagram.com/accounts/login/"},%s,1]]}]}', round(microtime(true) * 1000), round(microtime(true) * 1000), round(microtime(true) * 1000));
             $req = $client->createRequest('POST', $this->config['login_url'], array('body' => $payload));
 
-            $req->addHeaders([
+            $req->addHeaders(array(
                 'x-requested-with' => 'XMLHttpRequest',
-                'Origin' => $this->config['origin'],
-            ]);
-
+                'Origin'           => $this->config['origin'],
+            ));
 
             $response = $client->send($req);
 
-
-
-
             $cookie = SetCookie::fromString($response->getHeader('Set-Cookie'));
 
-            if(!$cookie->getName() == 'csrftoken')
+            if (!$cookie->getName() == 'csrftoken') {
                 throw new \RuntimeException('Missing csrftoken from header Set-Cookie response');
+            }
 
             $request->getBody()->setField('intent', '');
 
-            $request->addHeaders([
+            $request->addHeaders(array(
                 'X-CSRFToken' => $cookie->getValue(),
-                'cookie' =>'csrftoken='.$cookie->getValue(),
+                'cookie'      => 'csrftoken='.$cookie->getValue(),
                 //'X-Instagram-AJAX' => 1,
                 'X-Requested-With' => 'XMLHttpRequest',
-                'Origin' => $this->config['origin'],
-                'Referer' => $this->config['referer'],
-            ]);
+                'Origin'           => $this->config['origin'],
+                'Referer'          => $this->config['referer'],
+            ));
 
-            $config->overwriteWith([ 'redirect' => [
+            $config->overwriteWith(array('redirect' => array(
                 'max'     => 10,
                 'strict'  => true,
                 'referer' => true,
-            ]]);
-
+            )));
         }
-
-
-
     }
 
-    protected function hasCookiesSubscriber($request){
-
-        foreach( $request->getEmitter()->listeners('before') as $plugin ) {
-            if($plugin[0] instanceof Cookie )
+    protected function hasCookiesSubscriber($request)
+    {
+        foreach ($request->getEmitter()->listeners('before') as $plugin) {
+            if ($plugin[0] instanceof Cookie) {
                 return true;
+            }
         }
 
         return false;
-
     }
 }
