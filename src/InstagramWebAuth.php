@@ -18,10 +18,10 @@ class InstagramWebAuth implements SubscriberInterface {
         $this->config = Collection::fromConfig(
             $config,
             [
-                'login_ajax' => 'https://instagram.com/accounts/login/ajax',
-                'login_url' => 'https://instagram.com/accounts/login',
-                'origin' => 'https://instagram.com',
-                'referer' => 'https://instagram.com/accounts/login/ajax/?targetOrigin=https%3A%2F%2Finstagram.com',
+                'login_ajax' => 'https://www.instagram.com/accounts/login/ajax/',
+                'login_url' => 'https://www.instagram.com/ajax/bz',
+                'origin' => 'https://www.instagram.com',
+                'referer' => 'https://www.instagram.com',
                 'enable_cookie' => true,
             ],
             []
@@ -75,10 +75,19 @@ class InstagramWebAuth implements SubscriberInterface {
             if(empty($request->getBody()->getFields()['username']) || empty($request->getBody()->getFields()['password']))
                 throw new \RuntimeException('Username and password are required');
 
+            $payload = sprintf('{"q":[{"page_id":"","posts":[["slipstream:pageview",{"description":"loginPage","event_name":"pageview","platform":"web","extra":"{\"gk\":{\"rhp\":true}}","hostname":"www.instagram.com","path":"/accounts/login/","referer":"","url":"https://www.instagram.com/accounts/login/"},%s,0],["slipstream:action",{"description":"fbLoginFallback","event_name":"action","extra":"{\"gk\":{\"rhp\":true},\"type\":\"login\"}","hostname":"www.instagram.com","path":"/accounts/login/","referer":"","url":"https://www.instagram.com/accounts/login/"},%s,0]],"trigger":"slipstream:pageview"},{"page_id":"p8ysg7","posts":[["slipstream:action",{"description":"fbLoginFallback","event_name":"action","extra":"{\"gk\":{\"rhp\":true},\"type\":\"login\"}","hostname":"www.instagram.com","path":"/accounts/login/","referer":"","url":"https://www.instagram.com/accounts/login/"},%s,1]]}]}', round(microtime(true) * 1000), round(microtime(true) * 1000), round(microtime(true) * 1000));
+            $req = $client->createRequest('POST', $this->config['login_url'], array('body' => $payload));
 
-            $response = $client->send(
-                $client->createRequest('GET', $this->config['login_url'])
-            );
+            $req->addHeaders([
+                'x-requested-with' => 'XMLHttpRequest',
+                'Origin' => $this->config['origin'],
+            ]);
+
+
+            $response = $client->send($req);
+
+
+
 
             $cookie = SetCookie::fromString($response->getHeader('Set-Cookie'));
 
@@ -89,7 +98,8 @@ class InstagramWebAuth implements SubscriberInterface {
 
             $request->addHeaders([
                 'X-CSRFToken' => $cookie->getValue(),
-                'X-Instagram-AJAX' => 1,
+                'cookie' =>'csrftoken='.$cookie->getValue(),
+                //'X-Instagram-AJAX' => 1,
                 'X-Requested-With' => 'XMLHttpRequest',
                 'Origin' => $this->config['origin'],
                 'Referer' => $this->config['referer'],
@@ -98,9 +108,8 @@ class InstagramWebAuth implements SubscriberInterface {
             $config->overwriteWith([ 'redirect' => [
                 'max'     => 10,
                 'strict'  => true,
-                'referer' => true
+                'referer' => true,
             ]]);
-
 
         }
 

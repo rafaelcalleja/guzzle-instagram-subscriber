@@ -29,12 +29,13 @@ class ImplicitAuthTest extends \PHPUnit_Framework_TestCase
         'redirect_uri' => 'bar',
         'response_type'           => 'token',
         'scope' => 'likes+comments',
-        'authorize_url' => 'https://instagram.com/oauth/authorize',
-        'origin' => 'https://instagram.com'
+        'authorize_url' => 'https://www.instagram.com/oauth/authorize',
+        'origin' => 'https://www.instagram.com'
     ];
 
     public function testSubscribesToEvents()
     {
+
         $events = (new ImplicitAuth($this->config, new InstagramWebAuth([]) ))->getEvents();
         $this->assertArrayHasKey('before', $events);
     }
@@ -54,8 +55,8 @@ class ImplicitAuthTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('bar', $config['redirect_uri']);
         $this->assertEquals('token', $config['response_type']);
         $this->assertEquals('likes+comments', $config['scope']);
-        $this->assertEquals('https://instagram.com/oauth/authorize', $config['authorize_url']);
-        $this->assertEquals('https://instagram.com', $config['origin']);
+        $this->assertEquals('https://www.instagram.com/oauth/authorize', $config['authorize_url']);
+        $this->assertEquals('https://www.instagram.com', $config['origin']);
     }
 
     /**
@@ -100,12 +101,15 @@ class ImplicitAuthTest extends \PHPUnit_Framework_TestCase
         $client->getEmitter()->attach( new ImplicitAuth($this->config, $instagramWebAuthMock ));
         $client->getEmitter()->attach( new Mock([ new Response(200), new Response(200) ]) );
 
-        $client->post('https://instagram.com/oauth/authorize');
+        $client->post('https://www.instagram.com/oauth/authorize');
 
 
     }
 
-    public function testGetAccessTokenInHashUrlWithAppPreviouslyAuthorization(){
+    /**
+     * @dataProvider ulrProvider
+     */
+    public function testGetAccessTokenInHashUrlWithAppPreviouslyAuthorization($url){
 
         $client = new Client([]);
 
@@ -116,13 +120,21 @@ class ImplicitAuthTest extends \PHPUnit_Framework_TestCase
         $client->getEmitter()->attach($mock);
         $client->getEmitter()->attach( $implicitAuth );
 
-        $response = $client->post('https://instagram.com/oauth/authorize');
+        $client->post($url);
 
         $expected = '1558166829.033680f.4ec89a163eba441f875d4a88dd1a048e';
         $actual = $implicitAuth->getAccessToken();
 
         $this->assertEquals($expected, $actual);
 
+    }
+
+    public function ulrProvider()
+    {
+        return array(
+            array('https://www.instagram.com/oauth/authorize'),
+            array('https://instagram.com/oauth/authorize'),
+        );
     }
 
     public function testBehaviorValidateCookiesAndAddToHeaders(){
@@ -152,7 +164,7 @@ class ImplicitAuthTest extends \PHPUnit_Framework_TestCase
 
         $mock = $this->getSuccessMock();
         $client->getEmitter()->attach($mock);
-        $client->post('https://instagram.com/oauth/authorize');
+        $client->post('https://www.instagram.com/oauth/authorize');
 
     }
 
@@ -165,7 +177,7 @@ class ImplicitAuthTest extends \PHPUnit_Framework_TestCase
         $client->getEmitter()->attach($mock);
 
 
-        $request = $client->createRequest('POST', 'https://instagram.com/oauth/authorize');
+        $request = $client->createRequest('POST', 'https://www.instagram.com/oauth/authorize');
 
         $transaction = new Transaction($client, $request);
 
@@ -230,7 +242,7 @@ class ImplicitAuthTest extends \PHPUnit_Framework_TestCase
             $this->markTestSkipped('No CLIENT_ID provided in phpunit.xml');
             return;
         }
-        $client = new Client();
+        $client = new Client(['debug' => true]);
 
         $config = [
             'username' => $_SERVER['USERNAME'],
@@ -242,11 +254,12 @@ class ImplicitAuthTest extends \PHPUnit_Framework_TestCase
         $implicitAuth = new ImplicitAuth($config);
         $client->getEmitter()->attach($implicitAuth);
 
-        $client->post('https://instagram.com/oauth/authorize');
+        $client->post('https://www.instagram.com/oauth/authorize');
 
         $this->assertNotFalse($implicitAuth->getAccessToken());
 
     }
+
 
 
 }

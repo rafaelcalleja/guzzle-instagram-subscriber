@@ -70,7 +70,7 @@ class InstagramWebAuthTest extends \PHPUnit_Framework_TestCase
             new Response(200)
         ]);
 
-        $client = new Client(['base_url' => 'https://instagram.com']);
+        $client = new Client(['base_url' => 'https://www.instagram.com']);
         $history = new History();
         $cookie = new Cookie();
 
@@ -80,7 +80,7 @@ class InstagramWebAuthTest extends \PHPUnit_Framework_TestCase
 
         $client->getEmitter()->attach(new InstagramWebAuth($this->config));
 
-        $request = $client->createRequest('POST', 'accounts/login/ajax');
+        $request = $client->createRequest('POST', 'accounts/login/ajax/');
 
         $postBody = $request->getBody();
         $postBody->setField('username', 'test');
@@ -109,20 +109,20 @@ class InstagramWebAuthTest extends \PHPUnit_Framework_TestCase
             new Response(200)
         ]);
 
-        $client = new Client(['base_url' => 'https://instagram.com']);
+        $client = new Client(['base_url' => 'https://www.instagram.com']);
         $client->getEmitter()->attach(new InstagramWebAuth([]));
         $client->getEmitter()->attach($mock);
 
-        $client->post('accounts/login/ajax');
+        $client->post('accounts/login/ajax/');
 
     }
 
     public function testResponseIsValidRealWeb(){
-        $client = new Client(['base_url' => 'https://instagram.com']);
+        $client = new Client(['base_url' => 'https://www.instagram.com']);
 
         $client->getEmitter()->attach(new InstagramWebAuth([]));
 
-        $response = $client->post('accounts/login/ajax', ['body' => [ 'username' => 'foo', 'password' => 'bar']]);
+        $response = $client->post('accounts/login/ajax/', ['body' => [ 'username' => 'foo', 'password' => 'bar']]);
 
         json_decode($response->getBody());
 
@@ -149,7 +149,7 @@ class InstagramWebAuthTest extends \PHPUnit_Framework_TestCase
             ], Stream::factory('{"status":"ok","authentication":false}')  )
         ]));
 
-        $response = $client->post('https://instagram.com/accounts/login/ajax', ['body' => [ 'username' => 'foo', 'password' => 'bar']]);
+        $response = $client->post('https://www.instagram.com/accounts/login/ajax/', ['body' => [ 'username' => 'foo', 'password' => 'bar']]);
 
         json_decode($response->getBody());
 

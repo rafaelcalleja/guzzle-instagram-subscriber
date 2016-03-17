@@ -28,8 +28,8 @@ class ImplicitAuth implements SubscriberInterface {
             [
                 'response_type' => 'token',
                 'scope' => 'likes+comments',
-                'authorize_url' => 'https://instagram.com/oauth/authorize',
-                'origin' => 'https://instagram.com',
+                'authorize_url' => 'https://www.instagram.com/oauth/authorize',
+                'origin' => 'https://www.instagram.com',
                 'access_token' => false,
             ],
             ['username', 'password', 'client_id', 'redirect_uri' ]
@@ -57,13 +57,11 @@ class ImplicitAuth implements SubscriberInterface {
     public function onComplete(CompleteEvent $event)
     {
         $response = $event->getResponse();
-
         if (substr($response->getStatusCode(), 0, 1) != '3'
             || !$response->hasHeader('Location')
         ) {
             return;
         }
-
 
         $hash = parse_url($response->getHeader('Location'), PHP_URL_FRAGMENT);
 
@@ -114,9 +112,15 @@ class ImplicitAuth implements SubscriberInterface {
             $client->getEmitter()->attach($this->webauth);
         }
 
+        if(! preg_match('/(?:http[s]*\:\/\/)*(.*?)\.(?=[^\/]*\..{2,5})/i', $request->getUrl(), $match) ) {
+            $request->setUrl(preg_replace('/^(http[s]?)(\:\/\/)/', '$1://www.', $request->getUrl()));
+        }
+
+
         if( $request->getMethod() == 'POST' && $request->getUrl() == $this->config['authorize_url']) {
 
-            $response = $client->post('https://instagram.com/accounts/login/ajax', ['body' => [ 'username' => $this->config['username'], 'password' => $this->config['password']]]);
+
+            $response = $client->post('https://www.instagram.com/accounts/login/ajax/', ['body' => [ 'username' => $this->config['username'], 'password' => $this->config['password']]]);
 
             $cookies = $this->extractCookies($response);
 
