@@ -1,3 +1,6 @@
+[![Latest Stable Version](https://poser.pugx.org/guzzlehttp/guzzle-instagram-subscriber/v/stable)](https://packagist.org/packages/guzzlehttp/guzzle-instagram-subscriber)
+[![Build Status](https://travis-ci.org/rafaelcalleja/guzzle-instagram-subscriber.svg?branch=master)](https://travis-ci.org/rafaelcalleja/guzzle-instagram-subscriber)
+
 guzzle-instagram-subscriber
 ===========================
 
@@ -9,20 +12,20 @@ Installing
 This project can be installed using Composer. Add the following to your
 composer.json:
 
-.. code-block:: javascript
+```javascript
 
     {
         "require": {
             "guzzlehttp/guzzle-instagram-subscriber": "dev-master"
         }
     }
-
+```
 Retrieve the access token using the Implicit Authorization Subscriber
 ====================
 
 Here's an example showing how to authorize an instagram app and generate access token just one step:
 
-.. code-block:: php
+```php
 
     use GuzzleHttp\Client;
     use GuzzleHttp\Subscriber\Instagram\ImplicitAuth;
@@ -42,11 +45,10 @@ Here's an example showing how to authorize an instagram app and generate access 
     $client->post('https://instagram.com/oauth/authorize');
 
     $access_token = $implicitAuth->getAccessToken();
+```
 
-.. note::
-
-    Once you've registered your client it's easy to start requesting data from Instagram,
-    Using this access token to request the Instagram API endpoints.
-    More information: http://instagram.com/developer/endpoints/
+Once you've registered your client it's easy to start requesting data from Instagram,
+Using this access token to request the Instagram API endpoints.
+More information: http://instagram.com/developer/endpoints/
 
 
