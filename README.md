@@ -1,3 +1,6 @@
+[![Latest Stable Version](https://poser.pugx.org/guzzlehttp/guzzle-instagram-subscriber/v/stable)](https://packagist.org/packages/guzzlehttp/guzzle-instagram-subscriber)
+[![Build Status](https://travis-ci.org/rafaelcalleja/guzzle-instagram-subscriber.svg?branch=master)](https://travis-ci.org/rafaelcalleja/guzzle-instagram-subscriber)
+
 guzzle-instagram-subscriber
 ===========================
 
