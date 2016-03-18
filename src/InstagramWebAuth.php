@@ -11,7 +11,6 @@
 
 namespace GuzzleHttp\Subscriber\Instagram;
 
-use GuzzleHttp\Client;
 use GuzzleHttp\Collection;
 use GuzzleHttp\Cookie\SetCookie;
 use GuzzleHttp\Event\BeforeEvent;

@@ -18,9 +18,9 @@ use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Event\CompleteEvent;
 use GuzzleHttp\Event\RequestEvents;
 use GuzzleHttp\Event\SubscriberInterface;
+use GuzzleHttp\Exception\TooManyRedirectsException;
 use GuzzleHttp\Message\RequestInterface;
 use GuzzleHttp\Message\ResponseInterface;
-use GuzzleHttp\Subscriber\Cookie;
 
 class ImplicitAuth implements SubscriberInterface
 {
@@ -151,7 +151,7 @@ class ImplicitAuth implements SubscriberInterface
     {
         $request->setHeader('Cookie', implode('; ',
                 array_map(
-                    function ($cookie) {
+                    function (SetCookie $cookie) {
                         return $cookie->getName().'='.CookieJar::getCookieValue($cookie->getValue());
                     }, $cookies)
             )
