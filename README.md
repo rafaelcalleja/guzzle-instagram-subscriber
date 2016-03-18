@@ -47,8 +47,8 @@ Here's an example showing how to authorize an instagram app and generate access 
     $access_token = $implicitAuth->getAccessToken();
 ```
 
-⋅⋅⋅Once you've registered your client it's easy to start requesting data from Instagram,
-⋅⋅⋅Using this access token to request the Instagram API endpoints.
-⋅⋅⋅More information: http://instagram.com/developer/endpoints/
+Once you've registered your client it's easy to start requesting data from Instagram,
+Using this access token to request the Instagram API endpoints.
+More information: http://instagram.com/developer/endpoints/
 
 
