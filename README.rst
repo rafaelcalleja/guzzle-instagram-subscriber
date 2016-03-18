@@ -13,7 +13,7 @@ composer.json:
 
     {
         "require": {
-            "guzzlehttp/guzzle-instagram-subscriber": "0.1.*"
+            "guzzlehttp/guzzle-instagram-subscriber": "dev-master"
         }
     }
 
