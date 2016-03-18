@@ -79,7 +79,9 @@ class InstagramWebAuth implements SubscriberInterface
         }
 
         if ($request->getMethod() == 'POST' && $this->config['login_ajax'] == $request->getUrl()) {
-            if (empty($request->getBody()->getFields()['username']) || empty($request->getBody()->getFields()['password'])) {
+            
+            $fields = $request->getBody()->getFields();
+            if (empty($fields['username']) || empty($fields['password'])) {
                 throw new \RuntimeException('Username and password are required');
             }
 
